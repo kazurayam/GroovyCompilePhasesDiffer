@@ -25,6 +25,9 @@ dependencies {
     // This dependency is used by the application.
     implementation libs.guava
 
+    // https://mvnrepository.com/artifact/io.github.java-diff-utils/java-diff-utils
+    implementation("io.github.java-diff-utils:java-diff-utils:4.16")
+
     // Use the awesome Spock testing and specification framework even with Java
     testImplementation libs.spock.core
     testImplementation libs.junit
