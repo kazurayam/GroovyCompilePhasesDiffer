@@ -28,6 +28,9 @@ dependencies {
     // https://mvnrepository.com/artifact/io.github.java-diff-utils/java-diff-utils
     implementation("io.github.java-diff-utils:java-diff-utils:4.16")
 
+    // https://mvnrepository.com/artifact/com.kazurayam/monk-directory-scanner
+    implementation("com.kazurayam:monk-directory-scanner:0.1.1")
+
     // Use the awesome Spock testing and specification framework even with Java
     testImplementation libs.spock.core
     testImplementation libs.junit

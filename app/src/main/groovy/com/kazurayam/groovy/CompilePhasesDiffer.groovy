@@ -1,10 +1,9 @@
-package com.kazurayam.groovy.ast.tools
+package com.kazurayam.groovy
 
 import com.github.difflib.DiffUtils
 import com.github.difflib.UnifiedDiffUtils
 import com.github.difflib.patch.Patch
-import com.github.difflib.text.DiffRow
-import com.github.difflib.text.DiffRowGenerator
+import com.kazurayam.ant.DirectoryScanner
 import groovy.console.ui.AstNodeToScriptAdapter
 import org.codehaus.groovy.control.CompilationUnit
 import org.codehaus.groovy.control.CompilePhase
@@ -12,18 +11,21 @@ import org.codehaus.groovy.control.CompilePhase
 import java.nio.file.Files
 import java.nio.file.Path
 
-class PhasedUnparser {
+class CompilePhasesDiffer {
 
     static void unparse(String name, String sourceCode, Path outDir) {
         Objects.requireNonNull(name)
         Objects.requireNonNull(sourceCode)
         Objects.requireNonNull(outDir)
 
+        // replace non-file-path-comprising-characters
+        String escapedName = escape(name)
+
         CompilationUnit cu = new CompilationUnit()
-        cu.addSource(name, sourceCode)
+        cu.addSource(escapedName, sourceCode)
         cu.compile()
 
-        Files.createDirectories(outDir)
+        int countDeletedFiles = initializeOutDir(outDir, escapedName)
 
         AstNodeToScriptAdapter adapter = new AstNodeToScriptAdapter()
 
@@ -32,14 +34,13 @@ class PhasedUnparser {
         for (CompilePhase phase : CompilePhase.values()) {
             String unparseResult = adapter.compileToScript(sourceCode, phase.getPhaseNumber())
             phases.put(phase, unparseResult)
-            String fileName = "${name}_${phase.getPhaseNumber()}_${phase.toString()}.groovy"
+            String fileName = "${escapedName}-${phase.getPhaseNumber()}_${phase.toString()}.groovy"
             Path outFile = outDir.resolve(fileName)
             outFile.text = unparseResult
         }
 
         StringBuilder sb = new StringBuilder()
-        sb.append("# Compilation progress\n")
-        sb.append("- name: ${name}\n\n")
+        sb.append("# Groovy Compilation Phases\n")
 
         reportSection(sb, phases, CompilePhase.INITIALIZATION, CompilePhase.PARSING)
         reportSection(sb, phases, CompilePhase.PARSING, CompilePhase.CONVERSION)
@@ -50,8 +51,39 @@ class PhasedUnparser {
         reportSection(sb, phases, CompilePhase.CLASS_GENERATION, CompilePhase.OUTPUT)
         reportSection(sb, phases, CompilePhase.OUTPUT, CompilePhase.FINALIZATION)
 
-        Path report = outDir.resolve("progress.md")
+        Path report = outDir.resolve("${escapedName}-CompilePhases.md")
         report.text = sb.toString()
+    }
+
+    private static String escape(String str) {
+        return str
+                .replaceAll("\\\\", '_')
+                .replaceAll("/", '_')
+                .replaceAll(":", '')
+                .replaceAll("\\*", '')
+                .replaceAll("\\?", '')
+                .replaceAll('"', '')
+                .replaceAll("<", '')
+                .replaceAll(">", '')
+                .replaceAll("\\|", '')
+    }
+
+    private static int initializeOutDir(Path dir, String fileNamePrefix) {
+        // create the directory if not present
+        Files.createDirectories(dir)
+        // remove files of which fileName starts with the prefix
+        DirectoryScanner ds = new DirectoryScanner()
+        ds.setBasedir(dir.toFile())
+        ds.setIncludes(new String[]{"**/${fileNamePrefix}*"})
+        ds.scan()
+        String[] includedFiles = ds.getIncludedFiles()
+        int count = 0
+        for (int i = 0; i < includedFiles.length; i++) {
+            Path p = dir.resolve(includedFiles[i])
+            Files.delete(p)
+            count++
+        }
+        return count
     }
 
     /**

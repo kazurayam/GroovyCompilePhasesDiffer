@@ -1,11 +1,12 @@
-package com.kazurayam.groovy.ast.tools
+package com.kazurayam.groovy
+
 
 import org.junit.jupiter.api.Test
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class PhasedUnparserTest {
+class CompilePhasesDifferTest {
 
     @Test
     void testSmoke() {
@@ -13,6 +14,6 @@ class PhasedUnparserTest {
         String name = "Genius"
         String sourceCode = fixture.text
         Path outDir = Paths.get("./build/tmp/testOutput/PhasedUnparserTest")
-        PhasedUnparser.unparse(name, sourceCode, outDir)
+        CompilePhasesDiffer.unparse(name, sourceCode, outDir)
     }
 }
