@@ -1,5 +1,8 @@
 package com.kazurayam.groovy.ast.tools
 
+import com.github.difflib.DiffUtils
+import com.github.difflib.UnifiedDiffUtils
+import com.github.difflib.patch.Patch
 import com.github.difflib.text.DiffRow
 import com.github.difflib.text.DiffRowGenerator
 import groovy.console.ui.AstNodeToScriptAdapter
@@ -56,22 +59,21 @@ class PhasedUnparser {
      */
     private static void reportSection(StringBuilder sb, Map<CompilePhase, String> phases,
                                 CompilePhase leftPhase, CompilePhase rightPhase) {
-        sb.append("## ${leftPhase.getPhaseNumber()}_${leftPhase.toString()} vs ${rightPhase.getPhaseNumber()}_${rightPhase.toString()}\n\n")
+        sb.append("## ${leftPhase.getPhaseNumber()}_${leftPhase.toString()}" +
+                " vs ${rightPhase.getPhaseNumber()}_${rightPhase.toString()}\n\n")
+        sb.append("```\n")
 
-        DiffRowGenerator generator = DiffRowGenerator.create()
-                .showInlineDiffs(true)
-                .inlineDiffByWord(true)
-                //.oldTag(f -> "~")
-                //.newTag(f -> "**")
-                .build()
+        // generate Unified Diff
         List<String> leftLines = toLines(phases.get(leftPhase))
+        String leftName = "${leftPhase.getPhaseNumber()} ${leftPhase.toString()}"
         List<String> rightLines = toLines(phases.get(rightPhase))
-        List<DiffRow> rows = generator.generateDiffRows(leftLines, rightLines)
-        sb.append("|${leftPhase.getPhaseNumber()} ${leftPhase.toString()}|${rightPhase.getPhaseNumber()} ${rightPhase.toString()}|\n")
-        sb.append("|----------|----------|\n")
-        for (DiffRow row : rows) {
-            sb.append("|${row.getOldLine()}|${row.getNewLine()}|\n")
+        String rightName = "${rightPhase.getPhaseNumber()} ${rightPhase.toString()}"
+        List<String> unifiedDiff = generateUnifiedDiff(leftLines, leftName, rightLines, rightName)
+        for (String line : unifiedDiff) {
+            sb.append("${line}\n")
         }
+
+        sb.append("```\n")
         sb.append("\n\n")
     }
 
@@ -80,4 +82,12 @@ class PhasedUnparser {
         BufferedReader br = new BufferedReader(sr)
         return br.readLines()
     }
+
+    private static List<String> generateUnifiedDiff(
+            List<String> leftLines, String leftName,
+            List<String> rightLines, String rightName) {
+        Patch<String> patch = DiffUtils.diff(leftLines, rightLines)
+        return UnifiedDiffUtils.generateUnifiedDiff(leftName, rightName, leftLines, patch, 3)
+    }
+
 }
