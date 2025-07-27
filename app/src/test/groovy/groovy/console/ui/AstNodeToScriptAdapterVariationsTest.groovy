@@ -27,18 +27,17 @@ class Genius {
         cu.addSource('Genius.groovy', sourceCode)
         cu.compile()
 
-        List<ClassNode> classes = cu.getAST().getClasses()
         adapter = new AstNodeToScriptAdapter()
     }
 
     @Test
-    void test_CONVERSION() {
+    void test_CompilePhase_CONVERSION() {
         String unparsed = adapter.compileToScript(sourceCode, CompilePhase.CONVERSION.getPhaseNumber())
         println unparsed
     }
 
     @Test
-    void test_OUTPUT() {
+    void test_CompilePhase_OUTPUT() {
         String unparsed = adapter.compileToScript(sourceCode, CompilePhase.OUTPUT.getPhaseNumber())
         println unparsed
     }
