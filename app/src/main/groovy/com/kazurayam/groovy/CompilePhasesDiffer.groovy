@@ -3,6 +3,7 @@ package com.kazurayam.groovy
 import com.github.difflib.DiffUtils
 import com.github.difflib.UnifiedDiffUtils
 import com.github.difflib.patch.Patch
+import com.google.errorprone.annotations.Immutable
 import com.kazurayam.ant.DirectoryScanner
 import groovy.console.ui.AstNodeToScriptAdapter
 import org.codehaus.groovy.control.CompilationUnit
@@ -13,7 +14,7 @@ import java.nio.file.Path
 
 class CompilePhasesDiffer {
 
-    static void unparse(String name, String sourceCode, Path outDir) {
+    static Path report(String name, String sourceCode, Path outDir) {
         Objects.requireNonNull(name)
         Objects.requireNonNull(sourceCode)
         Objects.requireNonNull(outDir)
@@ -29,18 +30,22 @@ class CompilePhasesDiffer {
 
         AstNodeToScriptAdapter adapter = new AstNodeToScriptAdapter()
 
-        Map<CompilePhase, String> phases = new HashMap<>()
+        Map<CompilePhase, UnparseEntity> phases = new HashMap<>()
 
         for (CompilePhase phase : CompilePhase.values()) {
-            String unparseResult = adapter.compileToScript(sourceCode, phase.getPhaseNumber())
-            phases.put(phase, unparseResult)
-            String fileName = "${escapedName}-${phase.getPhaseNumber()}_${phase.toString()}.groovy"
-            Path outFile = outDir.resolve(fileName)
-            outFile.text = unparseResult
+            String rebuiltSource = adapter.compileToScript(sourceCode, phase.getPhaseNumber())
+            UnparseEntity ue = new UnparseEntity(name: escapedName, source: rebuiltSource)
+            phases.put(phase, ue)
+            Path outFile = outDir.resolve(
+                    "${escapedName}-${phase.getPhaseNumber()}_${phase.toString()}.groovy")
+            outFile.text = rebuiltSource
         }
 
         StringBuilder sb = new StringBuilder()
-        sb.append("# Groovy Compilation Phases\n")
+        sb.append("# Groovy AST Transformation phases\n\n")
+
+        sb.append("Groovy Compiler transforms the Abstract Syntax Tree of \"${name}\"." +
+                " AST is transformed at each CompilePhases. This report shows the diffs of AST.\n\n")
 
         reportSection(sb, phases, CompilePhase.INITIALIZATION, CompilePhase.PARSING)
         reportSection(sb, phases, CompilePhase.PARSING, CompilePhase.CONVERSION)
@@ -53,6 +58,7 @@ class CompilePhasesDiffer {
 
         Path report = outDir.resolve("${escapedName}-CompilePhases.md")
         report.text = sb.toString()
+        return report
     }
 
     private static String escape(String str) {
@@ -89,17 +95,20 @@ class CompilePhasesDiffer {
     /**
      *
      */
-    private static void reportSection(StringBuilder sb, Map<CompilePhase, String> phases,
-                                CompilePhase leftPhase, CompilePhase rightPhase) {
+    private static void reportSection(StringBuilder sb,
+                                      Map<CompilePhase, UnparseEntity> phases,
+                                      CompilePhase leftPhase,
+                                      CompilePhase rightPhase) {
         sb.append("## ${leftPhase.getPhaseNumber()}_${leftPhase.toString()}" +
                 " vs ${rightPhase.getPhaseNumber()}_${rightPhase.toString()}\n\n")
         sb.append("```\n")
 
         // generate Unified Diff
-        List<String> leftLines = toLines(phases.get(leftPhase))
-        String leftName = "${leftPhase.getPhaseNumber()} ${leftPhase.toString()}"
-        List<String> rightLines = toLines(phases.get(rightPhase))
-        String rightName = "${rightPhase.getPhaseNumber()} ${rightPhase.toString()}"
+        List<String> leftLines = toLines(phases.get(leftPhase).getSource())
+        String leftName = "${phases.get(leftPhase).getName()}-${leftPhase.getPhaseNumber()}_${leftPhase.toString()}.groovy"
+        List<String> rightLines = toLines(phases.get(rightPhase).getSource())
+        String rightName = "${phases.get(leftPhase).getName()}-${rightPhase.getPhaseNumber()}_${rightPhase.toString()}.groovy"
+
         List<String> unifiedDiff = generateUnifiedDiff(leftLines, leftName, rightLines, rightName)
         for (String line : unifiedDiff) {
             sb.append("${line}\n")
@@ -122,4 +131,8 @@ class CompilePhasesDiffer {
         return UnifiedDiffUtils.generateUnifiedDiff(leftName, rightName, leftLines, patch, 3)
     }
 
+    @Immutable
+    static class UnparseEntity {
+        String name, source
+    }
 }
