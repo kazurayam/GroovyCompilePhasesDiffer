@@ -19,19 +19,19 @@ class CompilePhasesDiffer {
         Objects.requireNonNull(sourceCode)
         Objects.requireNonNull(outDir)
 
-        // replace non-file-path-comprising-characters
+        // replace non-file-path-comprising-characters in the name
         String escapedName = escape(name)
+
+        //
+        initializeOutDir(outDir, escapedName)
 
         CompilationUnit cu = new CompilationUnit()
         cu.addSource(escapedName, sourceCode)
         cu.compile()
 
-        int countDeletedFiles = initializeOutDir(outDir, escapedName)
-
         AstNodeToScriptAdapter adapter = new AstNodeToScriptAdapter()
 
         Map<CompilePhase, UnparseEntity> phases = new HashMap<>()
-
         for (CompilePhase phase : CompilePhase.values()) {
             String rebuiltSource = adapter.compileToScript(sourceCode, phase.getPhaseNumber())
             UnparseEntity ue = new UnparseEntity(name: escapedName, source: rebuiltSource)
@@ -42,7 +42,7 @@ class CompilePhasesDiffer {
         }
 
         StringBuilder sb = new StringBuilder()
-        sb.append("# Groovy AST Transformation phases\n\n")
+        sb.append("# Groovy source unparsed by CompilePhases\n\n")
 
         sb.append("Groovy Compiler transforms the Abstract Syntax Tree of \"${name}\"." +
                 " AST is transformed at each CompilePhases. This report shows the diffs of AST.\n\n")

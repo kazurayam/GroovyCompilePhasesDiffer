@@ -6,8 +6,12 @@ class CompilePhaseTest {
 
     @Test
     void test_values() {
+        System.out.println("Values of the Enum `org.codehaus.groovy.control.CompilePhase`")
+        System.out.println("")
+        System.out.println("|name|value|")
+        System.out.println("|----|-----|")
         for (CompilePhase cp : CompilePhase.values()) {
-            System.out.println(String.format("%s:%d", cp, cp.getPhaseNumber()))
+            System.out.println(String.format("|`%s`|%d|", cp, cp.getPhaseNumber()))
             /*
             INITIALIZATION:1
             PARSING:2

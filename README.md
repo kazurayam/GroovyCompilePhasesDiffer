@@ -1,4 +1,21 @@
-# AstNodeToScriptAdapterExample
+# Groovy CompilePhases Differ
+
+Values of the Enum `org.codehaus.groovy.control.CompilePhase`
+
+|name|value|
+|----|-----|
+|`INITIALIZATION`|1|
+|`PARSING`|2|
+|`CONVERSION`|3|
+|`SEMANTIC_ANALYSIS`|4|
+|`CANONICALIZATION`|5|
+|`INSTRUCTION_SELECTION`|6|
+|`CLASS_GENERATION`|7|
+|`OUTPUT`|8|
+|`FINALIZATION`|9|
+
+
+AstNodeToScriptAdapterExample
 
 One day, I (kazurayam) asked a question to Copilot (AI agent):
 
