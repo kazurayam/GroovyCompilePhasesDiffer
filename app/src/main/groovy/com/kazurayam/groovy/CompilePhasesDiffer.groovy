@@ -14,13 +14,13 @@ import java.nio.file.Path
 
 class CompilePhasesDiffer {
 
-    static Path report(String name, String sourceCode, Path outDir) {
-        Objects.requireNonNull(name)
+    static Path report(String identifier, String sourceCode, Path outDir) {
+        Objects.requireNonNull(identifier)
         Objects.requireNonNull(sourceCode)
         Objects.requireNonNull(outDir)
 
-        // replace non-file-path-comprising-characters in the name
-        String escapedName = escape(name)
+        // replace non-file-path-comprising-characters in the identifier
+        String escapedName = escape(identifier)
 
         //
         initializeOutDir(outDir, escapedName)
@@ -34,7 +34,7 @@ class CompilePhasesDiffer {
         Map<CompilePhase, UnparseEntity> phases = new HashMap<>()
         for (CompilePhase phase : CompilePhase.values()) {
             String rebuiltSource = adapter.compileToScript(sourceCode, phase.getPhaseNumber())
-            UnparseEntity ue = new UnparseEntity(name: escapedName, source: rebuiltSource)
+            UnparseEntity ue = new UnparseEntity(identifier: escapedName, source: rebuiltSource)
             phases.put(phase, ue)
             Path outFile = outDir.resolve(
                     "${escapedName}-${phase.getPhaseNumber()}_${phase.toString()}.groovy")
@@ -42,10 +42,10 @@ class CompilePhasesDiffer {
         }
 
         StringBuilder sb = new StringBuilder()
-        sb.append("# Groovy source unparsed by CompilePhases\n\n")
+        sb.append("# How Groovy compiler transforms a source\n\n")
 
-        sb.append("Groovy Compiler transforms the Abstract Syntax Tree of \"${name}\"." +
-                " AST is transformed at each CompilePhases. This report shows the diffs of AST.\n\n")
+        sb.append("Groovy Compiler transforms the Abstract Syntax Tree of \"${identifier}\" gradually." +
+                " This report shows how the AST Transformation progresses by looking at the diffs each CompilePhase.\n\n")
 
         reportSection(sb, phases, CompilePhase.INITIALIZATION, CompilePhase.PARSING)
         reportSection(sb, phases, CompilePhase.PARSING, CompilePhase.CONVERSION)
@@ -105,9 +105,9 @@ class CompilePhasesDiffer {
 
         // generate Unified Diff
         List<String> leftLines = toLines(phases.get(leftPhase).getSource())
-        String leftName = "${phases.get(leftPhase).getName()}-${leftPhase.getPhaseNumber()}_${leftPhase.toString()}.groovy"
+        String leftName = "${phases.get(leftPhase).getIdentifier()}-${leftPhase.getPhaseNumber()}_${leftPhase.toString()}.groovy"
         List<String> rightLines = toLines(phases.get(rightPhase).getSource())
-        String rightName = "${phases.get(leftPhase).getName()}-${rightPhase.getPhaseNumber()}_${rightPhase.toString()}.groovy"
+        String rightName = "${phases.get(leftPhase).getIdentifier()}-${rightPhase.getPhaseNumber()}_${rightPhase.toString()}.groovy"
 
         List<String> unifiedDiff = generateUnifiedDiff(leftLines, leftName, rightLines, rightName)
         for (String line : unifiedDiff) {
@@ -133,6 +133,6 @@ class CompilePhasesDiffer {
 
     @Immutable
     static class UnparseEntity {
-        String name, source
+        String identifier, source
     }
 }
