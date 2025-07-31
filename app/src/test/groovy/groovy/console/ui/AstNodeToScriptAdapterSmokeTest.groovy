@@ -1,32 +1,33 @@
 package groovy.console.ui
 
-import org.codehaus.groovy.ast.ClassNode
+
 import org.codehaus.groovy.control.CompilationUnit
 import org.codehaus.groovy.control.CompilePhase
-
+import static org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
-class AstNodeToScriptAdapterVariationsTest {
+class AstNodeToScriptAdapterSmokeTest {
 
-    private static String sourceCode = '''
-package groovyinaction.ch09ast
-import groovy.transform.Immutable
-import groovy.transform.ToString
-@Immutable
-@ToString(includePackage=false)
-class Genius {
-    String firstName, lastName
-}
-'''
+    private static String sourceCode
     private AstNodeToScriptAdapter adapter
+
+    @BeforeAll
+    static void beforeClass() {
+        Path sourceFile = Paths.get('.').resolve('src/main/groovy/org/example/Genius.groovy')
+        assertTrue(Files.exists(sourceFile))
+        sourceCode = sourceFile.text
+    }
 
     @BeforeEach
     void setup() {
         CompilationUnit cu = new CompilationUnit()
         cu.addSource('Genius.groovy', sourceCode)
         cu.compile()
-
         adapter = new AstNodeToScriptAdapter()
     }
 

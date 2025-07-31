@@ -3,9 +3,8 @@ package com.kazurayam.groovy
 import com.github.difflib.DiffUtils
 import com.github.difflib.UnifiedDiffUtils
 import com.github.difflib.patch.Patch
-import com.google.errorprone.annotations.Immutable
-import com.kazurayam.ant.DirectoryScanner
 import groovy.console.ui.AstNodeToScriptAdapter
+import groovy.transform.Immutable
 import org.codehaus.groovy.control.CompilationUnit
 import org.codehaus.groovy.control.CompilePhase
 
@@ -22,8 +21,7 @@ class CompilePhasesDiffer {
         // replace non-file-path-comprising-characters in the identifier
         String escapedName = escape(identifier)
 
-        //
-        initializeOutDir(outDir, escapedName)
+        Files.createDirectories(outDir)
 
         CompilationUnit cu = new CompilationUnit()
         cu.addSource(escapedName, sourceCode)
@@ -56,7 +54,7 @@ class CompilePhasesDiffer {
         reportSection(sb, phases, CompilePhase.CLASS_GENERATION, CompilePhase.OUTPUT)
         reportSection(sb, phases, CompilePhase.OUTPUT, CompilePhase.FINALIZATION)
 
-        Path report = outDir.resolve("${escapedName}-CompilePhases.md")
+        Path report = outDir.resolve("${escapedName}-CompilePhasesDiff.md")
         report.text = sb.toString()
         return report
     }
@@ -72,24 +70,6 @@ class CompilePhasesDiffer {
                 .replaceAll("<", '')
                 .replaceAll(">", '')
                 .replaceAll("\\|", '')
-    }
-
-    private static int initializeOutDir(Path dir, String fileNamePrefix) {
-        // create the directory if not present
-        Files.createDirectories(dir)
-        // remove files of which fileName starts with the prefix
-        DirectoryScanner ds = new DirectoryScanner()
-        ds.setBasedir(dir.toFile())
-        ds.setIncludes(new String[]{"**/${fileNamePrefix}*"})
-        ds.scan()
-        String[] includedFiles = ds.getIncludedFiles()
-        int count = 0
-        for (int i = 0; i < includedFiles.length; i++) {
-            Path p = dir.resolve(includedFiles[i])
-            Files.delete(p)
-            count++
-        }
-        return count
     }
 
     /**

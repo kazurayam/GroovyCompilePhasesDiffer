@@ -1,4 +1,4 @@
-package example
+package org.example
 
 import groovy.transform.Immutable
 import groovy.transform.ToString
