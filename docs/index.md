@@ -1,0 +1,8 @@
+# Groovy Compile Phases Differ
+
+The CompilePhasesDiffer accepts a \*.groovy source.
+It drives Groovy Compiler to generate Abstract Syntax Tree (AST) for all CompilePhases and
+decompiles the AST into human-readable \*.groovy source files.
+It also generates a "CompilePhasesDiff" report where you can see the unified-diffs of
+the decompiled ASTs. With this report, you can see how Groovy Compiler process a \*.groovy
+source file to get a \*.class file. You can see the progress with human-readable diff of ASTs.
