@@ -8,7 +8,9 @@ version = '0.1.0-SNAPSHOT'
 
 ext {
     groovyVersion = '3.0.17'
+    slf4jVersion = '2.0.13'
     GitHubUserName = 'kazurayam'
+    artifactId = 'groovy-compile-phases-differ'
 }
 repositories {
     mavenCentral()
@@ -21,10 +23,16 @@ dependencies {
     // https://mvnrepository.com/artifact/io.github.java-diff-utils/java-diff-utils
     implementation("io.github.java-diff-utils:java-diff-utils:4.16")
 
+    implementation("org.slf4j:slf4j-api:${slf4jVersion}")
+    testRuntimeOnly("org.slf4j:slf4j-simple:${slf4jVersion}")
+
     // Use the awesome Spock testing and specification framework even with Java
     testImplementation libs.junit
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // https://mvnrepository.com/artifact/com.kazurayam/unittest-helper
+    testImplementation("com.kazurayam:unittest-helper:0.5.1")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -44,19 +52,21 @@ mavenPublishing {
     signAllPublications()
 
     coordinates(project.group,          // com.kazurayam
-            project.rootProject.name,   // groovy-compile-phases-differ
+            artifactId,   // groovy-compile-phases-differ
             project.version)            // e.g, 0.1.0 or 0.1.0-SNAPSHOT
 
     pom {
         name.set(project.rootProject.name)
         description.set('''
-This library provides com.kazurayam.groovy.CompilePhasesDiffer class 
-shows you how Groovy Compiler transforms a Groovy source 
-into a binary class. The Abstract Syntax Tree objects 
-of each CompilePhases will be unparsed into human-readable *.groovy 
-source files. A concise report in Markdown format presents the unified-diff 
-of the rebuilt sources which will let you understand what Groovy Compiler
-does at each CompilePhases.''')
+This library provides com.kazurayam.groovy.CompilePhasesDiffer class. 
+It shows you the unparsed source codes of Abstract Syntax Tree 
+that Groovy Compiler dynamically generates while it transforms  
+a Groovy source into a binary class file. 
+The Abstract Syntax Tree objects of each CompilePhases will be unparsed into human-readable *.groovy 
+source files so that you can read using your favorite text editor. 
+Additionally a concise report in Markdown format is generated, 
+which presents the unified-diff of the unparsed sources.  
+The diffs will show you what Groovy Compiler does at each CompilePhases.''')
         inceptionYear.set('2025')
         url.set("https://${GitHubUserName}.github.io/GroovyCompilePhasesDiffer/")
         licenses {
@@ -80,3 +90,6 @@ does at each CompilePhases.''')
         }
     }
 }
+
+// in the console, in order to publish the artifact to the Maven Central, type
+// $ ./gradlew publishToMavenCentral

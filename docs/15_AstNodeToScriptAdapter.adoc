@@ -1,0 +1,90 @@
+== AstNodeToScriptAdapter
+
+One day, I (kazurayam) asked a question to Copilot (AI agent):
+
+>In Groovy, I want to unparse an AST into source. How can I do it?
+
+Copilot replied as follows:
+
+>✨ If you're working with Groovy’s abstract syntax tree (AST) and want to turn it back into source code (a process often called “unparsing”), you’ve got a few tools at your disposal—though Groovy doesn’t have a built-in one-size-fits-all solution for this.
+
+>Here’s how you can go about it:
+
+>🛠 Option 1: Use Groovy’s AstNodeToScriptAdapter
+Groovy includes an adapter class that converts AST nodes back into Groovy source code. It’s found in the org.codehaus.groovy.tools.ast package.
+
+groovy
+```
+import org.codehaus.groovy.ast.ClassNode
+import org.codehaus.groovy.control.CompilationUnit
+import org.codehaus.groovy.tools.ast.AstNodeToScriptAdapter
+
+def sourceCode = '''
+class HelloWorld {
+static void main(String[] args) {
+println "Hello, Groovy!"
+}
+}
+'''
+
+def cu = new CompilationUnit()
+cu.addSource('script.groovy', sourceCode)
+cu.compile()
+
+def classes = cu.ast.getClasses()
+def adapter = new AstNodeToScriptAdapter()
+
+classes.each { ClassNode classNode ->
+def reconstructed = adapter.print(classNode)
+println reconstructed
+}
+```
+
+>🧩 Notes
+You’ll need access to the Groovy internals, so make sure the relevant modules are available in your classpath (like groovy-ant or groovy-tools depending on your version).
+
+>The adapter won’t always preserve original formatting or comments, but it does a solid job reconstructing syntactically correct Groovy code.
+
+I asked one more question:
+
+>What use of groovy.console.ui.AstNodeToScriptAdapter class
+
+Copilot replied as follows:
+
+>The groovy.console.ui.AstNodeToScriptAdapter class is a utility in the Groovy Console that serves a pretty neat purpose: it compiles Groovy source code to a specific phase of the compiler, then decompiles it back into readable Groovy source2.
+
+>Here’s how it’s typically used:
+
+>🧠 Primary Purpose
+
+>- AST Visualization: It powers the AST (Abstract Syntax Tree) Browser in the Groovy Console, helping developers inspect how Groovy transforms code during compilation.
+
+>- Debugging & Learning Tool: Useful for understanding AST transformations, especially when writing custom AST transforms.
+
+>🔧 Key Method
+groovy
+```
+String compileToScript(String script, int compilePhase, ClassLoader classLoader, boolean showScriptFreeForm, boolean showScriptClass, CompilerConfiguration config)
+```
+
+This method:
+
+>- Takes Groovy source code as input
+
+>- Compiles it to a specified phase (e.g., SEMANTIC_ANALYSIS, INSTRUCTION_SELECTION)
+
+>- Converts the AST back into Groovy-like source code for inspection
+
+>🖥️ Command-Line Use
+You can also run it from the command line to compile a Groovy file and print the resulting source:
+
+bash
+```
+java groovy.console.ui.AstNodeToScriptAdapter [filename] [compilePhase]
+```
+
+
+>🧪 Example Use Case
+Say you're using the @Immutable annotation and want to see what boilerplate code Groovy generates—this class lets you peek under the hood and see the transformed code.
+
+I wanted to see how the AstNodeToScriptAdapter works given with a single source code with `@Immutable` annotated and with different values of Compilation Phases. So I made the `app/src/test/groovy/groovy/console/ui/AstNodeToScriptAdapterVariationsTest`.

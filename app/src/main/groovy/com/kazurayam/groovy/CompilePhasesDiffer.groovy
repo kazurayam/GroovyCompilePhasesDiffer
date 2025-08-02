@@ -23,11 +23,16 @@ class CompilePhasesDiffer {
      * @param outDir
      * @return
      */
-    static Path report(String groovySource, String identifier, Path outDir) {
+    static Path report(String identifier, String groovySource, Path outDir) {
         // the params should not be null
-        Objects.requireNonNull(groovySource)
         Objects.requireNonNull(identifier)
+        Objects.requireNonNull(groovySource)
         Objects.requireNonNull(outDir)
+
+        // the identifier MUST NOT contain a newline character
+        if (identifier.contains('\\r') || identifier.contains('\\n')) {
+            throw new IllegalArgumentException("identifier must not contain a newline character")
+        }
 
         // replace non-file-path-comprising-characters in the identifier
         String escapedId = escape(identifier)

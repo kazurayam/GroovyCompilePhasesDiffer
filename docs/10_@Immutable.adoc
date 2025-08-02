@@ -1,0 +1,35 @@
+== How Groovy Compiler processes the @Immutable annotation
+
+One day, I wanted to learn something about Abstract Syntax Tree Transformation performed by Groovy Compiler.
+
+I read a book link:https://livebook.manning.com/book/groovy-in-action-second-edition/chapter-9#96[Groovy in Action, Second edition, Chapter 9, Compile-time metaprogramming and AST transformations]
+
+=== Sample class with `@Immutable` annotation
+
+The book presented a sample Groovy class `Genius` with `@Immutable` annotation.
+
+[source,groovy]
+----
+include::../app/src/main/groovy/org/example/Genius.groovy[]
+----
+
+=== JUnit5 test for the `Genius` class
+
+[source,groovy]
+----
+include::../app/src/test/groovy/org/example/GeniusTest.groovy[]
+----
+
+This test passed. This test proves that:
+
+1. `@Immutable` annotation resulted a Map constructor for the `Genuin` class; like `new Geniums(firstName:'Albert',lastName:'Einstein')`
+2. `@Immutable` annotation resulted a Tuple-style constructor; like `new Genius('Albert','Einsten')`
+3. `@Immutable` annotation resulted Getter methods, like `instance.getFirstName()`
+4. `@Immutable` annotation resulted `toString` method, like `instance.toString()`
+
+I could see the description in the book is right. No surprise. But I couldn't be confident that I understood it firmly.
+
+I wanted to see how the final `class` file looks like. I wanted to read it! But I know the `class` file is a binary file, not a text. So, I wanted to *unparse* the `class` into a text which explicitly declares all the methods and properties of the `Genuin` class.
+
+How can I *unparse* the binary `class` file into a text?
+
