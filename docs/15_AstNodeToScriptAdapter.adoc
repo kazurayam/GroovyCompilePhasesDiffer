@@ -105,6 +105,6 @@ Say you're using the @Immutable annotation and want to see what boilerplate code
 ____
 
 
-This conversation with Copilot was useful. I wanted to invent a utility that applies the `AstNodeToScriptAdapter`  to a single source code with a `@Immutable` annotation for every values of Compilation Phases to unparse the transient AST objects into human-readable *.groovy source codes.
+This conversation with Copilot was useful. I got an idea that I should invent a utility that applies the `AstNodeToScriptAdapter`  to a single source code with a `@Immutable` annotation for every value of Compilation Phases to unparse the transient AST objects into human-readable *.groovy source codes.
 
 So I developed the `com.kazurayam.groovy.CompilePhasesDiffer`.

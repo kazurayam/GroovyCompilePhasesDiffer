@@ -174,7 +174,7 @@ Copilot replied as follows:
 >
 > Say you’re using the @Immutable annotation and want to see what boilerplate code Groovy generates—this class lets you peek under the hood and see the transformed code.
 
-This conversation with Copilot was useful. I wanted to invent a utility that applies the `AstNodeToScriptAdapter` to a single source code with a `@Immutable` annotation for every values of Compilation Phases to unparse the transient AST objects into human-readable \*.groovy source codes.
+This conversation with Copilot was useful. I got an idea that I should invent a utility that applies the `AstNodeToScriptAdapter` to a single source code with a `@Immutable` annotation for every value of Compilation Phases to unparse the transient AST objects into human-readable \*.groovy source codes.
 
 So I developed the `com.kazurayam.groovy.CompilePhasesDiffer`.
 
@@ -616,6 +616,10 @@ If you read this report carefully, you would find how Groovy Compiler process a 
 
 For example,
 
-1.  at the "3 CONVERSION" phase, the compiler finished parsing the given source and generate the initial AST object.
+1.  at the "3 CONVERSION" phase, the compiler finished parsing the given source and generate the initial AST object as instructed by the `@Immutable` annotation.
 
-2.  at the "4 SEMANTIC\_ANALYSIS", "5 CANONICALIZATION" and "7 CLASS\_GENERATION" phases, the compiler gradually transforms the AST. It adds constructors, getters, equals and other fundamental methods as specified by the given `@Immutable` annotation.
+2.  at the "4 SEMANTIC\_ANALYSIS", "5 CANONICALIZATION" and "7 CLASS\_GENERATION" phases, the compiler gradually transforms the AST.
+
+3.  at the "5 CANONICALIATION" phase, the compiler adds constructors, equals method, toString method
+
+4.  at the "7 CLASS\_GENERATION" phase, the compiler adds getters
