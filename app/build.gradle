@@ -10,7 +10,6 @@ ext {
     groovyVersion = '3.0.17'
     slf4jVersion = '2.0.13'
     GitHubUserName = 'kazurayam'
-    artifactId = 'groovy-compile-phases-differ'
 }
 repositories {
     mavenCentral()
@@ -26,8 +25,8 @@ dependencies {
     implementation("org.slf4j:slf4j-api:${slf4jVersion}")
     testRuntimeOnly("org.slf4j:slf4j-simple:${slf4jVersion}")
 
-    // Use the awesome Spock testing and specification framework even with Java
-    testImplementation libs.junit
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.13.4")
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
@@ -47,12 +46,16 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+jar {
+    archiveBaseName = project.rootProject.name
+}
+
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
 
     coordinates(project.group,          // com.kazurayam
-            artifactId,   // groovy-compile-phases-differ
+            project.rootProject.name,   // groovy-compile-phases-differ
             project.version)            // e.g, 0.1.0 or 0.1.0-SNAPSHOT
 
     pom {
@@ -93,3 +96,4 @@ The diffs will show you what Groovy Compiler does at each CompilePhases.''')
 
 // in the console, in order to publish the artifact to the Maven Central, type
 // $ ./gradlew publishToMavenCentral
+

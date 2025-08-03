@@ -34,13 +34,13 @@ class CompilePhasesDifferTest {
 
     @Test
     void testReport() {
-        String identifier = "org/example/Genius.groovy"
+        String identifier = "com/kazurayam/example/Genius.groovy"
         Path sourceDir = Paths.get("./src/main/groovy")
         String sourceCode = sourceDir.resolve(identifier).text
         //
         Path report = CompilePhasesDiffer.report(identifier, sourceCode, outDir)
         assertTrue(Files.exists(report))
-        assertTrue(report.getFileName().toString().startsWith('org_example_Genius.groovy'))
+        assertTrue(report.getFileName().toString().startsWith('com_kazurayam_example_Genius.groovy'))
         assertTrue(report.getFileName().toString().endsWith('-CompilePhasesDiff.md'))
         try (Stream<Path> files = Files.list(outDir)) {
             // outDir should contain 9 .groovy files and 1 .md file

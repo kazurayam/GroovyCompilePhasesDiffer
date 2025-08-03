@@ -1,4 +1,4 @@
-package org.example
+package com.kazurayam.example
 
 import org.junit.jupiter.api.Test
 import static org.junit.jupiter.api.Assertions.assertEquals

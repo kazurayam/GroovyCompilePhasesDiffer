@@ -18,7 +18,7 @@ class AstNodeToScriptAdapterSmokeTest {
 
     @BeforeAll
     static void beforeClass() {
-        Path sourceFile = Paths.get('.').resolve('src/main/groovy/org/example/Genius.groovy')
+        Path sourceFile = Paths.get('.').resolve('src/main/groovy/com/kazurayam/example/Genius.groovy')
         assertTrue(Files.exists(sourceFile))
         sourceCode = sourceFile.text
     }

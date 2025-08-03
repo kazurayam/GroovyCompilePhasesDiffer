@@ -4,8 +4,8 @@ This is a memorandum by @kazurayam just for his own sake.
 
 include::10_@Immutable.adoc[]
 
-include::15_AstNodeToScriptAdapter.adoc[]
+include::20_AstNodeToScriptAdapter.adoc[]
 
-include::18_CompilePhase.adoc[]
+include::30_CompilePhase.adoc[]
 
-include::20_CompilePhasesDiffer.adoc[]
+include::40_CompilePhasesDiffer.adoc[]

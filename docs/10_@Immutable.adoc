@@ -8,14 +8,14 @@ The book presented a sample Groovy class `Genius` with `@Immutable` annotation.
 
 [source,groovy]
 ----
-include::../app/src/main/groovy/org/example/Genius.groovy[]
+include::../app/src/main/groovy/com/kazurayam/example/Genius.groovy[]
 ----
 
 === JUnit5 test for the `Genius` class
 
 [source,groovy]
 ----
-include::../app/src/test/groovy/org/example/GeniusTest.groovy[]
+include::../app/src/test/groovy/com/kazurayam/example/GeniusTest.groovy[]
 ----
 
 The tests passed. The tests proved that:

@@ -10,7 +10,7 @@ One day, I wanted to learn something about Abstract Syntax Tree Transformation p
 
 The book presented a sample Groovy class `Genius` with `@Immutable` annotation.
 
-    package org.example
+    package com.kazurayam.example
 
     import groovy.transform.Immutable
     import groovy.transform.ToString
@@ -28,7 +28,7 @@ The book presented a sample Groovy class `Genius` with `@Immutable` annotation.
 
 ### JUnit5 test for the `Genius` class
 
-    package org.example
+    package com.kazurayam.example
 
     import org.junit.jupiter.api.Test
     import static org.junit.jupiter.api.Assertions.assertEquals
