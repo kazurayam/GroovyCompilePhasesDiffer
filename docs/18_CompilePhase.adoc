@@ -1,15 +1,22 @@
 == CompilePhase
 
-Values of the Enum `org.codehaus.groovy.control.CompilePhase`
+See the javadoc of `groovy.console.ui.AstNodeToScriptAdapter` at link:https://docs.groovy-lang.org/3.0.17/html/gapi//groovy/console/ui/AstNodeToScriptAdapter.html#compileToScript(java.lang.String,%20int,%20java.lang.ClassLoader,%20boolean,%20boolean,%20org.codehaus.groovy.control.CompilerConfiguration)[String compileToScript(String int, ClassLoader, boolean boolean, CompilerConfiguration]
 
-|name|value|
-|----|-----|
-|`INITIALIZATION`|1|
-|`PARSING`|2|
-|`CONVERSION`|3|
-|`SEMANTIC_ANALYSIS`|4|
-|`CANONICALIZATION`|5|
-|`INSTRUCTION_SELECTION`|6|
-|`CLASS_GENERATION`|7|
-|`OUTPUT`|8|
-|`FINALIZATION`|9|
+The second argument `int compilePhase` looked mysterious to mee. I checked the javadoc of `org.codehaus.groovy.control.CompilePhase` at link:https://docs.groovy-lang.org/3.0.17/html/gapi//org/codehaus/groovy/control/CompilePhase.html[CompilePhase]
+
+
+
+|===
+| name | value | description
+
+|`INITIALIZATION`|1|source files are opened and environment configured
+|`PARSING`|2|the grammar is used to produce tree of tokens representing the source code
+|`CONVERSION`|3|An abstract syntax tree (AST) is created from token trees
+|`SEMANTIC_ANALYSIS`|4|Performs consistency and validity checks that the grammar can't check for, and resolves classes
+|`CANONICALIZATION`|5|Complete building the AST
+|`INSTRUCTION_SELECTION`|6|nstruction set is chosen, for example java5 or pre java5
+|`CLASS_GENERATION`|7|creates the binary output in memory
+|`OUTPUT`|8|write the binary output to the file system
+|`FINALIZATION`|9|Perform any last cleanup
+|===
+

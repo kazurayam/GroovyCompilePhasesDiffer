@@ -1,5 +1,8 @@
 # Groovy Compile Phases Differ
 
+- date: August, 2025
+- author: kazurayam (kazuakai.urayama@gmail.com)
+
 This is a memorandum by @kazurayam just for his own sake.
 
 ## How Groovy Compiler processes the @Immutable annotation

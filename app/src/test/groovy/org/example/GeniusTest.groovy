@@ -19,6 +19,13 @@ class GeniusTest {
     }
 
     @Test
+    void testEquals() {
+        Genius a = new Genius('Albert', 'Einstein')
+        Genius b = new Genius('Albert', 'Einstein')
+        assertEquals(a, b)
+    }
+
+    @Test
     void testGetters() {
         Genius instance = new Genius('Albert', 'Einstein')
         assertEquals('Albert', instance.getFirstName())
