@@ -4,7 +4,7 @@ See the javadoc of `groovy.console.ui.AstNodeToScriptAdapter` at link:https://do
 
 The second argument `int compilePhase` looked mysterious to mee. I checked the javadoc of `org.codehaus.groovy.control.CompilePhase` at link:https://docs.groovy-lang.org/3.0.17/html/gapi//org/codehaus/groovy/control/CompilePhase.html[CompilePhase]
 
-
+The following is the essence of the Enum `org.codehaus.groovy.control.CompilePhase`.
 
 |===
 | name | value | description

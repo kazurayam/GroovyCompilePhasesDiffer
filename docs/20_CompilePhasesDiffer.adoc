@@ -1,8 +1,62 @@
 == What is CompilePhasesDiffer class
 
-The CompilePhasesDiffer accepts a *.groovy source.
-It drives Groovy Compiler to generate Abstract Syntax Tree (AST) for all CompilePhases and
-decompiles the AST into human-readable *.groovy source files.
-It also generates a "CompilePhasesDiff" report where you can see the unified-diffs of
-the decompiled ASTs. With this report, you can see how Groovy Compiler process a *.groovy
-source file to get a *.class file. You can see the progress with human-readable diff of ASTs.
+I have developed a tool class `com.kazurayam.groovy.CompilePhasesDiffer` in Groovy. I tested it with groovy v3.0.17. It should run on JDK 17 and newer.
+
+You can get the jar which contains the `CompilePhasesDiffer` in the GitHub Releases page at
+
+- https://github.com/kazurayam/GroovyCompilePhasesDiffer/releases
+
+The `CompilePhasesDiffer` class depends on the following external library:
+
+- link:https://mvnrepository.com/artifact/io.github.java-diff-utils/java-diff-utils/4.16[java-diff-utils v4.16]
+
+=== Sample use
+
+link:https://github.com/kazurayam/GroovyCompilePhasesDiffer/blob/master/app/src/test/groovy/com/kazurayam/groovy/CompilePhasesDifferTest.groovy[src/test/groovy/com/kazurayam/groovy/CompilePhasesDifferTest.groovy]
+
+[source,groovy]
+----
+include::../app/src/test/groovy/com/kazurayam/groovy/CompilePhasesDifferTest.groovy[]
+----
+
+When I ran this test, I got several files created in the outputDir specified.
+
+[source, console]
+----
+~/github/GroovyCompilePhasesDiffer git:[master]
+tree app/build/tmp/testOutput/com.kazurayam.groovy.CompilePhasesDifferTest/
+app/build/tmp/testOutput/com.kazurayam.groovy.CompilePhasesDifferTest/
+├── org_example_Genius.groovy-1_INITIALIZATION.groovy
+├── org_example_Genius.groovy-2_PARSING.groovy
+├── org_example_Genius.groovy-3_CONVERSION.groovy
+├── org_example_Genius.groovy-4_SEMANTIC_ANALYSIS.groovy
+├── org_example_Genius.groovy-5_CANONICALIZATION.groovy
+├── org_example_Genius.groovy-6_INSTRUCTION_SELECTION.groovy
+├── org_example_Genius.groovy-7_CLASS_GENERATION.groovy
+├── org_example_Genius.groovy-8_OUTPUT.groovy
+├── org_example_Genius.groovy-9_FINALIZATION.groovy
+└── org_example_Genius.groovy-CompilePhasesDiff.md
+
+1 directory, 10 files
+----
+
+The `org_example_Genius.groovy-3_CONVERSION.groovy` and other *.groovy files are the *unparsed* AST of each CompilePhases. You can read the ASTs as text there.
+
+The final file named`*-CompilePhasesDiff.md` is most interesting.
+
+=== The output
+
+[source, markdown]
+----
+include::./output/com.kazurayam.groovy.CompilePhasesDifferTest/org_example_Genius.groovy-CompilePhasesDiff.md[]
+----
+
+If you read this report carefully, you would find how Groovy Compiler process a *.groovy source to generate a binary .class with concreate details how the `Immutable` annotation affects the AST object of each individual CompilePhases.
+
+For example,
+
+1. at the "3 CONVERSION" phase, the compiler finished parsing the given source and generate the initial AST object.
+
+2. at the "4 SEMANTIC_ANALYSIS", "5 CANONICALIZATION" and "7 CLASS_GENERATION" phases, the compiler gradually transforms the AST. It adds constructors, getters, equals and other fundamental methods as specified by the given `@Immutable` annotation.
+
+
