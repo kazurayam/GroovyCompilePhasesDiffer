@@ -46,8 +46,8 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-jar {
-    archiveBaseName = project.rootProject.name
+base {
+    archivesName = project.rootProject.name
 }
 
 mavenPublishing {
