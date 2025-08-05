@@ -1,5 +1,7 @@
 # Groovy Compile Phases Differ
 
+back to [the project’s repository](https://github.com/kazurayam/GroovyCompilePhasesDiffer/)
+
 This is a memorandum by @kazurayam just for his own sake.
 
 ## How Groovy Compiler processes the @Immutable annotation
@@ -294,19 +296,17 @@ The `CompilePhasesDiffer` class depends on the following external library:
         @BeforeAll
         static void beforeAll() {
             outDir = too.cleanClassOutputDirectory()
-            DeleteDir.deleteDirectoryRecursively(outDir)
-            Files.createDirectories(outDir)
         }
 
         @Test
         void testReport() {
-            String identifier = "org/example/Genius.groovy"
+            String identifier = "com/kazurayam/example/Genius.groovy"
             Path sourceDir = Paths.get("./src/main/groovy")
             String sourceCode = sourceDir.resolve(identifier).text
             //
             Path report = CompilePhasesDiffer.report(identifier, sourceCode, outDir)
             assertTrue(Files.exists(report))
-            assertTrue(report.getFileName().toString().startsWith('org_example_Genius.groovy'))
+            assertTrue(report.getFileName().toString().startsWith('com_kazurayam_example_Genius.groovy'))
             assertTrue(report.getFileName().toString().endsWith('-CompilePhasesDiff.md'))
             try (Stream<Path> files = Files.list(outDir)) {
                 // outDir should contain 9 .groovy files and 1 .md file

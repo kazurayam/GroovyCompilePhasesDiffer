@@ -28,8 +28,6 @@ class CompilePhasesDifferTest {
     @BeforeAll
     static void beforeAll() {
         outDir = too.cleanClassOutputDirectory()
-        DeleteDir.deleteDirectoryRecursively(outDir)
-        Files.createDirectories(outDir)
     }
 
     @Test
