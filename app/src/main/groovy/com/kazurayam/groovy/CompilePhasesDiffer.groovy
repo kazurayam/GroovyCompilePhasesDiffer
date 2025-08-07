@@ -7,6 +7,7 @@ import groovy.console.ui.AstNodeToScriptAdapter
 import groovy.transform.Immutable
 import org.codehaus.groovy.control.CompilationUnit
 import org.codehaus.groovy.control.CompilePhase
+import org.codehaus.groovy.control.CompilerConfiguration
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -20,14 +21,15 @@ class CompilePhasesDiffer {
      *
      * @param groovySource
      * @param identifier
-     * @param outDir
+     * @param reportDir
      * @return
      */
-    static Path report(String identifier, String groovySource, Path outDir) {
+    static Path report(String identifier, String groovySource, Path classesDir, Path reportDir) {
         // the params should not be null
         Objects.requireNonNull(identifier)
         Objects.requireNonNull(groovySource)
-        Objects.requireNonNull(outDir)
+        Objects.requireNonNull(classesDir)
+        Objects.requireNonNull(reportDir)
 
         // the identifier MUST NOT contain a newline character
         if (identifier.contains('\\r') || identifier.contains('\\n')) {
@@ -37,11 +39,18 @@ class CompilePhasesDiffer {
         // replace non-file-path-comprising-characters in the identifier
         String escapedId = escape(identifier)
 
-        // ensure the output directory
-        Files.createDirectories(outDir)
+        // ensure the directory where the binary .class file is written
+        Files.createDirectories(classesDir)
+
+        // ensure the directory where the .groovy files and .md file as report are written
+        Files.createDirectories(reportDir)
+
+        // instantiate the CompilerConfiguration object
+        CompilerConfiguration config = new CompilerConfiguration()
+        config.setTargetDirectory(classesDir.toFile())
 
         // instantiate the CompilationUnit object
-        CompilationUnit cu = new CompilationUnit()
+        CompilationUnit cu = new CompilationUnit(config) // while specifying the classesDir
         cu.addSource(escapedId, groovySource)
         cu.compile()
 
@@ -57,7 +66,7 @@ class CompilePhasesDiffer {
             UnparseEntity ue = new UnparseEntity(identifier: escapedId, source: rebuiltSource)
             phases.put(phase, ue)
             // save the rebuilt Groovy source of each CompilePhase into a file in the output directory
-            Path outFile = outDir.resolve(
+            Path outFile = reportDir.resolve(
                     "${escapedId}-${phase.getPhaseNumber()}_${phase.toString()}.groovy")
             outFile.text = rebuiltSource
         }
@@ -77,7 +86,7 @@ class CompilePhasesDiffer {
         reportSubsection(sb, phases, CompilePhase.CLASS_GENERATION, CompilePhase.OUTPUT)
         reportSubsection(sb, phases, CompilePhase.OUTPUT, CompilePhase.FINALIZATION)
         // write the report
-        Path report = outDir.resolve("${escapedId}-CompilePhasesDiff.md")
+        Path report = reportDir.resolve("${escapedId}-CompilePhasesDiff.md")
         report.text = sb.toString()
         return report
     }
