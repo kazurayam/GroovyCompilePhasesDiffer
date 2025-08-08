@@ -1,8 +1,10 @@
 package groovy.console.ui
 
 import com.kazurayam.unittest.DeleteDir
+import com.kazurayam.unittest.TestOutputOrganizer
 import org.codehaus.groovy.control.CompilationUnit
 import org.codehaus.groovy.control.CompilePhase
+import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -16,69 +18,85 @@ import static org.junit.jupiter.api.Assertions.*
 
 class AstNodeToScriptAdapterSmokeTest {
 
+    private static final TestOutputOrganizer too =
+            new TestOutputOrganizer.Builder(AstNodeToScriptAdapterSmokeTest.class)
+                    .outputDirectoryRelativeToProject("build/tmp/testOutput")
+                    .subOutputDirectory(AstNodeToScriptAdapter.class)
+                    .build()
     private static String sourceCode
+    private static Path classesDir
+    private static Path geniusClassFile
+    private CompilerConfiguration config
     private AstNodeToScriptAdapter adapter
-
-    private static Path UNWANTED_CLASS_FILE = Paths.get('com/kazurayam/example/Genius.class')
 
     @BeforeAll
     static void beforeClass() {
+        //input
         Path sourceFile = Paths.get('.').resolve('src/main/groovy/com/kazurayam/example/Genius.groovy')
         assertTrue(Files.exists(sourceFile))
         sourceCode = sourceFile.text
+        //output
+        Path outDir = too.cleanClassOutputDirectory()
+        classesDir = outDir.resolve("classes")
+        Files.createDirectories(classesDir)
+        geniusClassFile = classesDir.resolve('com/kazurayam/example/Genius.class')
     }
 
     @BeforeEach
     void setup() {
-        CompilationUnit cu = new CompilationUnit()
+        config = new CompilerConfiguration()
+        config.setTargetDirectory(classesDir.toFile())
+        //
+        CompilationUnit cu = new CompilationUnit(config)
         cu.addSource('Genius.groovy', sourceCode)
         cu.compile()
         adapter = new AstNodeToScriptAdapter()
         //
-        deleteComDir()
+        deleteGeniusClassFile()
     }
 
-    @AfterEach
-    void tearDown() {
-        deleteComDir()
-    }
-
-    private static void deleteComDir() {
-        if (Files.exists(UNWANTED_CLASS_FILE)) {
-            Path comDir = Paths.get('com')
-            DeleteDir.deleteDirectoryRecursively(comDir)
+    private static void deleteGeniusClassFile() {
+        if (Files.exists(geniusClassFile)) {
+            DeleteDir.deleteDirectoryRecursively(classesDir)
         }
     }
 
     @Test
     void test_CompilePhase_CONVERSION() {
-        assertFalse(Files.exists(UNWANTED_CLASS_FILE), "the unwanted class file should not be present")
-        String unparsed = adapter.compileToScript(sourceCode, CompilePhase.CONVERSION.getPhaseNumber())
+        assertFalse(Files.exists(geniusClassFile), "the Genius class file should not be present")
+        String unparsed = adapter.compileToScript(sourceCode,
+                CompilePhase.CONVERSION.getPhaseNumber(),
+                null, false, false, config)
         assertNotNull(unparsed)
-        assertFalse(Files.exists(UNWANTED_CLASS_FILE), "the unwanted class file should not be present")
+        assertFalse(Files.exists(geniusClassFile), "the Genius class file should not be present")
     }
 
     @Test
     void test_CompilePhase_CLASS_GENERATION() {
-        assertFalse(Files.exists(UNWANTED_CLASS_FILE), "the unwanted class file should not be present")
-        String unparsed = adapter.compileToScript(sourceCode, CompilePhase.CLASS_GENERATION.getPhaseNumber())
+        assertFalse(Files.exists(geniusClassFile), "the Genius class file should not be present")
+        String unparsed = adapter.compileToScript(sourceCode,
+                CompilePhase.CLASS_GENERATION.getPhaseNumber(),
+                null, false, false, config)
         assertNotNull(unparsed)
-        assertFalse(Files.exists(UNWANTED_CLASS_FILE), "the unwanted class file should not be present")
+        assertFalse(Files.exists(geniusClassFile), "the Genius class file should not be present")
     }
 
     /**
-     * See https://github.com/kazurayam/GroovyCompilePhasesDiffer/issues/1
+     * See https://github.com/kazurayam/GroovyCompilePhasesDiffer/issues/1 ,
+     * issues/4 and issues/5.
      * Running the AstNodeToScriptAdapter.compileToScript with CompilePhase.OUTPUT
-     * results a unwanted class file written into the current working directory.
-     * In other words, if I want to avoid that file,
-     * I should refrain from running the method with CompilePhase.OUTPUT.
+     * results a binary *.class file written into the specified directory.
+     * If I want to avoid that file, I should refrain from running the method
+     * with CompilePhase.OUTPUT.
      */
     @Test
-    void issue1() {
-        assertFalse(Files.exists(UNWANTED_CLASS_FILE), "the unwanted class file should not be present")
-        String unparsed = adapter.compileToScript(sourceCode, CompilePhase.OUTPUT.getPhaseNumber())
+    void issue1_4_5() {
+        assertFalse(Files.exists(geniusClassFile), "the Genius class file should not be present")
+        String unparsed = adapter.compileToScript(sourceCode,
+                CompilePhase.OUTPUT.getPhaseNumber(),
+                null, false, false, config)
         assertNotNull(unparsed)
-        // the unwanted class file will be created when CompilePhase.OUTPUT is specified
-        assertTrue(Files.exists(UNWANTED_CLASS_FILE), "the unwanted class file should be present")
+        // the Genius class file will be created when CompilePhase.OUTPUT is specified
+        assertTrue(Files.exists(geniusClassFile), "the Genius class file should be present")
     }
 }

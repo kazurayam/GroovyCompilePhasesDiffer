@@ -1,6 +1,6 @@
-== What is CompilePhasesDiffer class
+== CompilePhasesDiffer class --- sample use
 
-I have developed a tool class `com.kazurayam.groovy.CompilePhasesDiffer` in Groovy. I tested it with groovy v3.0.17. It should run on JDK 17 and newer.
+I have developed a tool class `com.kazurayam.groovy.CompilePhasesDiffer` in Groovy. I tested it with groovy v3.0.17. It should run on JDK 11 and newer.
 
 You can get the jar which contains the `CompilePhasesDiffer` in the GitHub Releases page at
 

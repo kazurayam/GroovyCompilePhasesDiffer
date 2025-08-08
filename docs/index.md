@@ -137,6 +137,10 @@ Copilot replied as follows:
 >
 > The adapter won’t always preserve original formatting or comments, but it does a solid job reconstructing syntactically correct Groovy code.
 
+The response from Copilot was useful because it let me know of the `org.codehaus.groovy.tools.ast.AstNodeToScriptAdapter` class.
+
+Later, I tried the code suggested by Copilot, and found it does not compile. The code had several mistakes. The code contained some hallucinations which AI tends to make.
+
 I asked Copilot one more question:
 
 > What use of groovy.console.ui.AstNodeToScriptAdapter class?
@@ -176,7 +180,8 @@ Copilot replied as follows:
 >
 > Say you’re using the @Immutable annotation and want to see what boilerplate code Groovy generates—this class lets you peek under the hood and see the transformed code.
 
-This conversation with Copilot was useful. I got an idea that I should invent a utility that applies the `AstNodeToScriptAdapter` to a single source code with a `@Immutable` annotation for every value of Compilation Phases to unparse the transient AST objects into human-readable \*.groovy source codes.
+At the end of the useful conversation with Copilot,
+I got an idea that I would be able to invent a utility that applies the `AstNodeToScriptAdapter` class to a single source code with a `@Immutable` annotation for every value of Compilation Phases to unparse the transient AST objects into human-readable \*.groovy source codes.
 
 So I developed the `com.kazurayam.groovy.CompilePhasesDiffer`.
 
@@ -250,9 +255,9 @@ The following is the essence of the Enum `org.codehaus.groovy.control.CompilePha
 </tbody>
 </table>
 
-## What is CompilePhasesDiffer class
+## CompilePhasesDiffer class --- sample use
 
-I have developed a tool class `com.kazurayam.groovy.CompilePhasesDiffer` in Groovy. I tested it with groovy v3.0.17. It should run on JDK 17 and newer.
+I have developed a tool class `com.kazurayam.groovy.CompilePhasesDiffer` in Groovy. I tested it with groovy v3.0.17. It should run on JDK 11 and newer.
 
 You can get the jar which contains the `CompilePhasesDiffer` in the GitHub Releases page at
 
@@ -268,12 +273,10 @@ The `CompilePhasesDiffer` class depends on the following external library:
 
     package com.kazurayam.groovy
 
-    import com.kazurayam.unittest.DeleteDir
+
     import com.kazurayam.unittest.TestOutputOrganizer
     import org.junit.jupiter.api.BeforeAll
     import org.junit.jupiter.api.Test
-    import org.slf4j.Logger
-    import org.slf4j.LoggerFactory
 
     import java.nio.file.Files
     import java.nio.file.Path
@@ -285,32 +288,45 @@ The `CompilePhasesDiffer` class depends on the following external library:
 
     class CompilePhasesDifferTest {
 
-        private static final Logger log = LoggerFactory.getLogger(CompilePhasesDifferTest)
         private static final TestOutputOrganizer too =
                 new TestOutputOrganizer.Builder(CompilePhasesDifferTest.class)
                         .outputDirectoryRelativeToProject("build/tmp/testOutput")
                         .subOutputDirectory(CompilePhasesDifferTest.class)
-                        .build();
-        private static Path outDir
+                        .build()
+
+        // the directory where the binary *.class file is written
+        private static Path classesDir
+
+        // the directory where the unparsed *.groovy source files are written
+        //                     also the diff report in Markdown format is written
+        private static Path reportDir
 
         @BeforeAll
         static void beforeAll() {
-            outDir = too.cleanClassOutputDirectory()
+            Path outDir = too.cleanClassOutputDirectory()
+            classesDir = outDir.resolve("classes")
+            reportDir = outDir.resolve("report")
         }
 
         @Test
         void testReport() {
+            // input source
             String identifier = "com/kazurayam/example/Genius.groovy"
             Path sourceDir = Paths.get("./src/main/groovy")
             String sourceCode = sourceDir.resolve(identifier).text
-            //
-            Path report = CompilePhasesDiffer.report(identifier, sourceCode, outDir)
+            // do the job
+            Path report = CompilePhasesDiffer.report(identifier, sourceCode, classesDir, reportDir)
+            // verify the result
             assertTrue(Files.exists(report))
             assertTrue(report.getFileName().toString().startsWith('com_kazurayam_example_Genius.groovy'))
             assertTrue(report.getFileName().toString().endsWith('-CompilePhasesDiff.md'))
-            try (Stream<Path> files = Files.list(outDir)) {
-                // outDir should contain 9 .groovy files and 1 .md file
+            try (Stream<Path> files = Files.list(reportDir)) {
+                // the reportDir should contain 9 *.groovy files and 1 *.md file
                 assertEquals(10, files.count())
+            }
+            try (Stream<Path> files = Files.list(classesDir)) {
+                // the classesDir should contain a *.class file
+                assertEquals(1, files.count())
             }
         }
     }

@@ -19,8 +19,13 @@ class CompilePhasesDifferTest {
             new TestOutputOrganizer.Builder(CompilePhasesDifferTest.class)
                     .outputDirectoryRelativeToProject("build/tmp/testOutput")
                     .subOutputDirectory(CompilePhasesDifferTest.class)
-                    .build();
+                    .build()
+
+    // the directory where the binary *.class file is written
     private static Path classesDir
+
+    // the directory where the unparsed *.groovy source files are written
+    //                     also the diff report in Markdown format is written
     private static Path reportDir
 
     @BeforeAll
@@ -32,11 +37,13 @@ class CompilePhasesDifferTest {
 
     @Test
     void testReport() {
+        // input source
         String identifier = "com/kazurayam/example/Genius.groovy"
         Path sourceDir = Paths.get("./src/main/groovy")
         String sourceCode = sourceDir.resolve(identifier).text
-        //
+        // do the job
         Path report = CompilePhasesDiffer.report(identifier, sourceCode, classesDir, reportDir)
+        // verify the result
         assertTrue(Files.exists(report))
         assertTrue(report.getFileName().toString().startsWith('com_kazurayam_example_Genius.groovy'))
         assertTrue(report.getFileName().toString().endsWith('-CompilePhasesDiff.md'))

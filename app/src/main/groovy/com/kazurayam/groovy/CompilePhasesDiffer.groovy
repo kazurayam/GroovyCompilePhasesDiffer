@@ -18,13 +18,22 @@ import java.nio.file.Path
 class CompilePhasesDiffer {
 
     /**
+     * Drives the Groovy Compiler to compile the given *.groovy source code.
+     * Generates Abstract Syntax Tree of 9 CompilePhases,
+     * unparse the AST objects into *.groovy source file.
+     * Makes unified-diff information of the generated * groovy sources,
+     * and generates a report in Markdown format which shows you
+     * how Groovy Compiler transforms the AST object gradually
+     * as it processes the *.groovy source into the binary *.class file.
      *
-     * @param groovySource
-     * @param identifier
-     * @param reportDir
-     * @return
+     * @param identifier a short name of the groovy source code
+     * @param groovySource the groovy source code text
+     * @param classesDir a directory where *.class file is written into
+     * @param reportDir a directory where a set of *.groovy files and *.md file is written into
+     * @return the Path of the *.md file which contains the diff information of AST of each CompilePhases
      */
-    static Path report(String identifier, String groovySource, Path classesDir, Path reportDir) {
+    static Path report(String identifier, String groovySource,
+                       Path classesDir, Path reportDir) {
         // the params should not be null
         Objects.requireNonNull(identifier)
         Objects.requireNonNull(groovySource)
@@ -33,7 +42,8 @@ class CompilePhasesDiffer {
 
         // the identifier MUST NOT contain a newline character
         if (identifier.contains('\\r') || identifier.contains('\\n')) {
-            throw new IllegalArgumentException("identifier must not contain a newline character")
+            throw new IllegalArgumentException(
+                    "identifier must not contain a newline character")
         }
 
         // replace non-file-path-comprising-characters in the identifier
@@ -47,10 +57,11 @@ class CompilePhasesDiffer {
 
         // instantiate the CompilerConfiguration object
         CompilerConfiguration config = new CompilerConfiguration()
+        // explicitly specify the directory where *.class file is written into
         config.setTargetDirectory(classesDir.toFile())
 
         // instantiate the CompilationUnit object
-        CompilationUnit cu = new CompilationUnit(config) // while specifying the classesDir
+        CompilationUnit cu = new CompilationUnit(config)
         cu.addSource(escapedId, groovySource)
         cu.compile()
 
@@ -61,14 +72,14 @@ class CompilePhasesDiffer {
         Map<CompilePhase, UnparseEntity> phases = new HashMap<>()
         for (CompilePhase phase : CompilePhase.values()) {
             // unparse the AST
-            String rebuiltSource = adapter.compileToScript(groovySource, phase.getPhaseNumber())
+            String unparsedSource
+                    = adapter.compileToScript(groovySource, phase.getPhaseNumber())
             // memorize the rebuilt Groovy source
-            UnparseEntity ue = new UnparseEntity(identifier: escapedId, source: rebuiltSource)
-            phases.put(phase, ue)
-            // save the rebuilt Groovy source of each CompilePhase into a file in the output directory
+            phases.put(phase, new UnparseEntity(identifier: escapedId, source: unparsedSource))
+            // save the rebuilt Groovy source of each CompilePhase into a file
             Path outFile = reportDir.resolve(
                     "${escapedId}-${phase.getPhaseNumber()}_${phase.toString()}.groovy")
-            outFile.text = rebuiltSource
+            outFile.text = unparsedSource
         }
 
         // generate the report

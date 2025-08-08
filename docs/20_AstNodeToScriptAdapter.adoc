@@ -54,6 +54,10 @@ You’ll need access to the Groovy internals, so make sure the relevant modules 
 The adapter won’t always preserve original formatting or comments, but it does a solid job reconstructing syntactically correct Groovy code.
 ____
 
+The response from Copilot was useful because it let me know of the `org.codehaus.groovy.tools.ast.AstNodeToScriptAdapter` class.
+
+Later, I tried the code suggested by Copilot, and found it does not compile. The code had several mistakes. The code contained some hallucinations which AI tends to make.
+
 I asked Copilot one more question:
 
 [quote]
@@ -105,6 +109,7 @@ Say you're using the @Immutable annotation and want to see what boilerplate code
 ____
 
 
-This conversation with Copilot was useful. I got an idea that I should invent a utility that applies the `AstNodeToScriptAdapter`  to a single source code with a `@Immutable` annotation for every value of Compilation Phases to unparse the transient AST objects into human-readable *.groovy source codes.
+At the end of the useful conversation with Copilot,
+I got an idea that I would be able to invent a utility that applies the `AstNodeToScriptAdapter` class to a single source code with a `@Immutable` annotation for every value of Compilation Phases to unparse the transient AST objects into human-readable *.groovy source codes.
 
 So I developed the `com.kazurayam.groovy.CompilePhasesDiffer`.
